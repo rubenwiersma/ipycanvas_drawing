@@ -1,0 +1,32 @@
+Metadata-Version: 2.1
+Name: ipycanvas-drawing
+Version: 0.0.1
+Summary: A small widget to let users draw by hand in a Jupyter notebook.
+Author-email: Ruben Wiersma <rubenwiersma@gmail.com>
+Project-URL: Homepage, https://github.com/rubenwiersma/ipycanvas_drawing
+Project-URL: Bug Tracker, https://github.com/rubenwiersma/ipycanvas_drawing/issues
+Requires-Python: >3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Drawing utility in ipycanvas
+Small utility to make simple drawings in Jupyter notebooks with ipycanvas and ipywidgets.
+
+## Installing
+```pip install ipycanvas-drawing```
+
+## Usage
+Create a simple drawing interface:
+
+```python
+from ipycanvas-drawing import DrawingWidget
+
+drawing_widget = DrawingWidget(width=500, height=500)
+drawing_widget.show()
+
+# Get output as numpy array
+image_data = drawing_widget.canvas.get_image_data()
+```
+
+## Credits
+Based on the [hand drawing example](https://github.com/martinRenou/ipycanvas/blob/master/examples/hand_drawing.ipynb) provided by @martinRenou, but adds some additional functionality like adding squares and ellipses and a 1-step undo.

@@ -1,0 +1,9 @@
+LICENSE
+README.md
+pyproject.toml
+src/ipycanvas-drawing/__init__.py
+src/ipycanvas-drawing/drawing_widget.py
+src/ipycanvas_drawing.egg-info/PKG-INFO
+src/ipycanvas_drawing.egg-info/SOURCES.txt
+src/ipycanvas_drawing.egg-info/dependency_links.txt
+src/ipycanvas_drawing.egg-info/top_level.txt
