@@ -1,8 +1,10 @@
 from enum import Enum
 
+import numpy as np
 from ipywidgets import Image
-from ipywidgets import ColorPicker, IntSlider, link, AppLayout, HBox, VBox, Button, Label, ToggleButtons, ToggleButtonsStyle
+from ipywidgets import ColorPicker, IntSlider, link, HBox, VBox, Button, ToggleButtons
 from ipycanvas import MultiCanvas, hold_canvas
+
 
 class Tools(Enum):
     BRUSH = 0
@@ -14,23 +16,36 @@ class DrawingWidget(object):
     position = None
     shape = []
     output_array = None
+    drawing_line_width = 3
+    prev_canvas = None
     tool_selection = ToggleButtons(description="Tool:",
                                    options=[('Brush ', Tools.BRUSH), ('Square ', Tools.SQUARE), ('Circle ', Tools.CIRCLE)],
                                    value=Tools.BRUSH,
                                    icons=['brush', 'square', 'circle'])
-    drawing_line_width = 3
-    prev_canvas = None
     
-    def __init__(self, width, height, background="#FFFFFF"):
+    def __init__(self, width, height, background="#FFFFFF", alpha=1.0, default_style="#000000", default_radius=10):
+        """
+        Create a MultiCanvas with three layers: a background layer, the drawing layer, and a temporary layer during drawing.
+
+        params:
+            width (int): Width of the canvas.
+            height (int): Height of the canvas.
+            background (string, np.Array): background in the first layer.
+                Can be given as a hex-code (str) or a numpy array with values to fill in.
+            alpha (float): Transparency of the drawing layer. Helpful for masking.
+            default_style (str): Hex-code (str) of the default color in the colorpicker.
+        """
         # Initialization
         self.background = background
-        self.init_canvas(width, height, background)
+        self.alpha = alpha
+        self.default_style = default_style
+        self.default_radius = default_radius
+        self.init_canvas(width, height)
 
-    def init_canvas(self, width, height, background):
+    def init_canvas(self, width, height):
         self.canvas = MultiCanvas(n_canvases=3, width=width, height=height, sync_image_data=True)
-        self.canvas[0].fill_style = background
-        self.canvas[0].fill_rect(0, 0, self.canvas.width, self.canvas.height)
-        
+        self.reset_background()
+
         self.canvas.on_mouse_down(self.on_mouse_down)
         self.canvas.on_mouse_move(self.on_mouse_move)
         self.canvas.on_mouse_up(self.on_mouse_up)
@@ -41,19 +56,30 @@ class DrawingWidget(object):
         self.canvas[2].line_width = self.drawing_line_width
         self.canvas[2].global_alpha = 0.5
         
-        self.canvas[1].stroke_style = "#000000"
+        self.canvas[1].stroke_style = self.default_style
         self.canvas[1].line_cap = 'round'
         self.canvas[1].line_join = 'round'
-        self.canvas[1].line_width = 10
+        self.canvas[1].line_width = self.default_radius
+        self.canvas[1].global_alpha = self.alpha
     
+    def reset_background(self, *args):
+        with hold_canvas(): 
+            if type(self.background) is np.ndarray:
+                self.canvas[0].put_image_data(self.background)
+            else:
+                self.canvas[0].fill_style = self.background
+                self.canvas[0].fill_rect(0, 0, self.canvas.width, self.canvas.height)
+
     def show(self):
         # UI controls
-        picker = ColorPicker(description="Color:", value="#000000")
-        radius_slider = IntSlider(description="Brush radius:", value=10, min=1, max=50)
+        picker = ColorPicker(description="Color:", value=self.default_style)
+        radius_slider = IntSlider(description="Brush radius:", value=self.default_radius, min=1, max=100)
         clear_button = Button(description="Clear")
         clear_button.on_click(self.clear_canvas)
         undo_button = Button(description="Undo")
         undo_button.on_click(self.undo)
+        background_button = Button(description="Reset background")
+        background_button.on_click(self.reset_background)
 
         # Link UI controls to canvas
         link((picker, "value"), (self.canvas[1], "stroke_style"))
@@ -61,7 +87,7 @@ class DrawingWidget(object):
         link((radius_slider, "value"), (self.canvas[1], "line_width"))
 
         # Display in grid
-        return HBox((self.canvas, VBox((self.tool_selection, picker, radius_slider, clear_button, undo_button))))
+        return HBox((self.canvas, VBox((self.tool_selection, picker, radius_slider, clear_button, undo_button, background_button))))
         
     def on_mouse_down(self, x, y):
         self.drawing = True
@@ -107,8 +133,15 @@ class DrawingWidget(object):
         self.shape = []
 
     def clear_canvas(self, *args):
-        self.canvas[1].clear()
+        with hold_canvas():
+            self.canvas[1].clear()
         
     def undo(self, *args):
         if self.prev_canvas is not None:
-            self.canvas[1].put_image_data(self.prev_canvas)
+            with hold_canvas():
+                self.canvas[1].put_image_data(self.prev_canvas)
+
+    def get_drawing(self):
+        with hold_canvas():
+            self.canvas[0].clear()
+        return self.canvas.get_image_data().copy()
