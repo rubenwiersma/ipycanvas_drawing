@@ -1,5 +1,6 @@
 # Drawing utility in ipycanvas
 Small utility to make simple drawings in Jupyter notebooks with ipycanvas and ipywidgets.
+Useful for getting quick user input in research prototypes, e.g., for masking, annotation, etc.
 
 ![Example usage](img/example_screenshot.png)
 
