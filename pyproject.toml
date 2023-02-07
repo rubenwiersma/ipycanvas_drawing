@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "ipycanvas", "ipywidgets", "numpy"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -11,6 +11,7 @@ authors = [
 description = "A small widget to let users draw by hand in a Jupyter notebook."
 readme = "README.md"
 requires-python = ">3.6"
+dependencies = ["ipycanvas", "ipywidgets"]
 
 [project.urls]
 "Homepage" = "https://github.com/rubenwiersma/ipycanvas_drawing"
