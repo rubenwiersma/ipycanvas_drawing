@@ -2,7 +2,7 @@
 Small utility to make simple drawings in Jupyter notebooks with ipycanvas and ipywidgets.
 
 ## Installing
-```pip install ipycanvas_drawing```
+```pip install ipycanvas-drawing```
 
 ## Usage
 Create a simple drawing interface. Check out the notebook in `examples` for a more complete example.
