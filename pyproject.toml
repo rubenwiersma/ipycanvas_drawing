@@ -11,7 +11,7 @@ authors = [
 description = "A small widget to let users draw by hand in a Jupyter notebook."
 readme = "README.md"
 requires-python = ">3.6"
-dependencies = ["ipycanvas", "ipywidgets"]
+dependencies = ["ipycanvas", "ipywidgets", "numpy"]
 
 [project.urls]
 "Homepage" = "https://github.com/rubenwiersma/ipycanvas_drawing"

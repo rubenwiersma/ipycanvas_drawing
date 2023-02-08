@@ -1,4 +1,5 @@
 from enum import Enum
+import copy
 
 import numpy as np
 from ipywidgets import Image
@@ -44,6 +45,7 @@ class DrawingWidget(object):
 
     def init_canvas(self, width, height):
         self.canvas = MultiCanvas(n_canvases=3, width=width, height=height, sync_image_data=True)
+        self.canvas._canvases[1].sync_image_data = True
         self.reset_background()
 
         self.canvas.on_mouse_down(self.on_mouse_down)
@@ -54,7 +56,6 @@ class DrawingWidget(object):
         self.canvas[2].fill_style = "#4287F5"
         self.canvas[2].line_cap = 'round'
         self.canvas[2].line_width = self.drawing_line_width
-        self.canvas[2].global_alpha = 0.5
         
         self.canvas[1].stroke_style = self.default_style
         self.canvas[1].line_cap = 'round'
@@ -93,7 +94,7 @@ class DrawingWidget(object):
         self.drawing = True
         self.position = (x, y)
         self.shape = [self.position]
-        self.prev_canvas = self.canvas.get_image_data()
+        self.prev_canvas = copy.copy(self.canvas._canvases[1].get_image_data())
 
     def on_mouse_move(self, x, y):
         if not self.drawing:
@@ -141,7 +142,7 @@ class DrawingWidget(object):
             with hold_canvas():
                 self.canvas[1].put_image_data(self.prev_canvas)
 
-    def get_drawing(self):
-        with hold_canvas():
-            self.canvas[0].clear()
-        return self.canvas.get_image_data().copy()
+    def get_image(self, background=False):
+        if background:
+            return self.canvas.get_image_data()
+        return self.canvas._canvases[1].get_image_data()
