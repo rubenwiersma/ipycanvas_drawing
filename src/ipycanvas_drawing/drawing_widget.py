@@ -31,9 +31,10 @@ class DrawingWidget(object):
             width (int): Width of the canvas.
             height (int): Height of the canvas.
             background (string, np.Array): background in the first layer.
-                Can be given as a hex-code (str) or a numpy array with values to fill in.
-            alpha (float): Transparency of the drawing layer. Helpful for masking.
-            default_style (str): Hex-code (str) of the default color in the colorpicker.
+                Can be given as a hex-code (str) or a numpy array with values to fill in (default: #FFFFFF).
+            alpha (float): Transparency of the drawing layer. Helpful for masking (default: 1.0).
+            default_style (str): Hex-code (str) of the default color in the colorpicker (default: #000000)
+            default_radius (int): Default brush radius (default: 10).
         """
         # Initialization
         self.background = background
@@ -42,8 +43,13 @@ class DrawingWidget(object):
         self.default_radius = default_radius
         self.init_canvas(width, height)
 
+    def get_image_data(self, background=False):
+        if background:
+            return self.canvas.get_image_data()
+        return self.canvas._canvases[1].get_image_data()
+
     def init_canvas(self, width, height):
-        self.canvas = MultiCanvas(n_canvases=3, width=width, height=height)
+        self.canvas = MultiCanvas(n_canvases=3, width=width, height=height, sync_image_data=True)
         self.canvas._canvases[1].sync_image_data = True
         self.reset_background()
 
@@ -63,14 +69,12 @@ class DrawingWidget(object):
         self.canvas[1].global_alpha = self.alpha
     
     def reset_background(self, *args):
-        self.canvas._canvases[0].sync_image_data = True
         with hold_canvas(): 
             if type(self.background) is np.ndarray:
                 self.canvas[0].put_image_data(self.background)
             else:
                 self.canvas[0].fill_style = self.background
                 self.canvas[0].fill_rect(0, 0, self.canvas.width, self.canvas.height)
-        self.canvas._canvases[0].sync_image_data = False
 
     def show(self):
         # UI controls
@@ -164,7 +168,3 @@ class DrawingWidget(object):
                 self.canvas[1].put_image_data(self.future[-1])
                 self.future = self.future[:-1]
 
-    def get_image_data(self, background=False):
-        if background:
-            return self.canvas.get_image_data()
-        return self.canvas._canvases[1].get_image_data()

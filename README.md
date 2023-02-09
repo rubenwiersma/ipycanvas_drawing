@@ -16,8 +16,14 @@ Create a simple drawing interface. Check out the notebook in `examples` for a mo
 ```python
 from ipycanvas_drawing import DrawingWidget
 
-drawing_widget = DrawingWidget(width=500, height=500)
+# Create a drawing widget
+# You can set other setup parameters: background, alpha, default_style, default_radius
+drawing_widget = DrawingWidget(width=500, height=500) 
+# Show the drawing widget
 drawing_widget.show()
+
+# Get the image data as a numpy array
+image_output = drawing_widget.get_image_data()
 ```
 
 ## Credits
