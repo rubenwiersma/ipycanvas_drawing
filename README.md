@@ -1,4 +1,6 @@
 # Jupyter drawing utility
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rubenwiersma/ipycanvas_drawing/HEAD?labpath=examples%2Fexample_drawing.ipynb)
+
 Small utility to make simple drawings in Jupyter notebooks with ipycanvas and ipywidgets.
 Useful for getting quick user input in research prototypes, e.g., for masking or annotation.
 
