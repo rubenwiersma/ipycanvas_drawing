@@ -18,11 +18,10 @@ class DrawingWidget(object):
     shape = []
     output_array = None
     drawing_line_width = 3
-    prev_canvas = None
-    tool_selection = ToggleButtons(description="Tool:",
-                                   options=[('Brush ', Tools.BRUSH), ('Square ', Tools.SQUARE), ('Circle ', Tools.CIRCLE)],
-                                   value=Tools.BRUSH,
-                                   icons=['brush', 'square', 'circle'])
+    history = []
+    future = []
+    max_history = 100
+    tool_selection = None
     
     def __init__(self, width, height, background="#FFFFFF", alpha=1.0, default_style="#000000", default_radius=10):
         """
@@ -44,7 +43,7 @@ class DrawingWidget(object):
         self.init_canvas(width, height)
 
     def init_canvas(self, width, height):
-        self.canvas = MultiCanvas(n_canvases=3, width=width, height=height, sync_image_data=True)
+        self.canvas = MultiCanvas(n_canvases=3, width=width, height=height)
         self.canvas._canvases[1].sync_image_data = True
         self.reset_background()
 
@@ -64,23 +63,28 @@ class DrawingWidget(object):
         self.canvas[1].global_alpha = self.alpha
     
     def reset_background(self, *args):
+        self.canvas._canvases[0].sync_image_data = True
         with hold_canvas(): 
             if type(self.background) is np.ndarray:
                 self.canvas[0].put_image_data(self.background)
             else:
                 self.canvas[0].fill_style = self.background
                 self.canvas[0].fill_rect(0, 0, self.canvas.width, self.canvas.height)
+        self.canvas._canvases[0].sync_image_data = False
 
     def show(self):
         # UI controls
+        self.tool_selection = ToggleButtons(options=[('Brush ', Tools.BRUSH), ('Square ', Tools.SQUARE), ('Circle ', Tools.CIRCLE)],
+                                            value=Tools.BRUSH,
+                                            icons=['brush', 'square', 'circle'])
         picker = ColorPicker(description="Color:", value=self.default_style)
         radius_slider = IntSlider(description="Brush radius:", value=self.default_radius, min=1, max=100)
         clear_button = Button(description="Clear")
         clear_button.on_click(self.clear_canvas)
-        undo_button = Button(description="Undo")
+        undo_button = Button(description="Undo", icon="rotate-left")
         undo_button.on_click(self.undo)
-        background_button = Button(description="Reset background")
-        background_button.on_click(self.reset_background)
+        redo_button = Button(description="Redo", icon="rotate-right")
+        redo_button.on_click(self.redo)
 
         # Link UI controls to canvas
         link((picker, "value"), (self.canvas[1], "stroke_style"))
@@ -88,13 +92,19 @@ class DrawingWidget(object):
         link((radius_slider, "value"), (self.canvas[1], "line_width"))
 
         # Display in grid
-        return HBox((self.canvas, VBox((self.tool_selection, picker, radius_slider, clear_button, undo_button, background_button))))
+        return HBox((self.canvas, VBox((self.tool_selection, picker, radius_slider, clear_button, HBox((undo_button, redo_button))))))
+
+    def save_to_history(self):
+        self.history.append(self.canvas._canvases[1].get_image_data())
+        if len(self.history) > self.max_history:
+            self.history = self.history[1:]
+        self.future = []
         
     def on_mouse_down(self, x, y):
         self.drawing = True
         self.position = (x, y)
         self.shape = [self.position]
-        self.prev_canvas = copy.copy(self.canvas._canvases[1].get_image_data())
+        self.save_to_history()
 
     def on_mouse_move(self, x, y):
         if not self.drawing:
@@ -134,15 +144,27 @@ class DrawingWidget(object):
         self.shape = []
 
     def clear_canvas(self, *args):
+        self.save_to_history()
         with hold_canvas():
             self.canvas[1].clear()
         
     def undo(self, *args):
-        if self.prev_canvas is not None:
+        if self.history:
             with hold_canvas():
-                self.canvas[1].put_image_data(self.prev_canvas)
+                self.future.append(self.canvas._canvases[1].get_image_data())
+                self.canvas[1].clear()
+                self.canvas[1].put_image_data(self.history[-1])
+                self.history = self.history[:-1]
 
-    def get_image(self, background=False):
+    def redo(self, *args):
+        if self.future:
+            with hold_canvas():
+                self.save_to_history()
+                self.canvas[1].clear()
+                self.canvas[1].put_image_data(self.future[-1])
+                self.future = self.future[:-1]
+
+    def get_image_data(self, background=False):
         if background:
             return self.canvas.get_image_data()
         return self.canvas._canvases[1].get_image_data()
