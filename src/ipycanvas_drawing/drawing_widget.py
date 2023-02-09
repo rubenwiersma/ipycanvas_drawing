@@ -159,7 +159,7 @@ class DrawingWidget(object):
     def redo(self, *args):
         if self.future:
             with hold_canvas():
-                self.save_to_history()
+                self.history.append(self.canvas._canvases[1].get_image_data())
                 self.canvas[1].clear()
                 self.canvas[1].put_image_data(self.future[-1])
                 self.future = self.future[:-1]
