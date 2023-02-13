@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ipycanvas_drawing"
-version = "0.0.4"
+version = "0.0.5"
 authors = [
     { name = "Ruben Wiersma", email = "rubenwiersma@gmail.com" },
 ]
