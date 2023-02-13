@@ -28,5 +28,11 @@ drawing_widget.show()
 image_output = drawing_widget.get_image_data()
 ```
 
+## Known issues
+- Visual Studio Code's Jupyter environment doesn't like ipycanvas's `sync_image_data` functionality.
+  Workaround: open notebooks in Jupyter lab or Notebook in the browser.
+- ipycanvas does not work in Google Colab.
+  Workaround: use the [Binder](https://mybinder.org/v2/gh/rubenwiersma/ipycanvas_drawing/HEAD?labpath=examples%2Fexample_drawing.ipynb) to quickly try the tool without needing to install it on your own machine.
+
 ## Credits
 Based on the [hand drawing example](https://github.com/martinRenou/ipycanvas/blob/master/examples/hand_drawing.ipynb) provided by @martinRenou, but adds some additional functionality like adding squares and ellipses and a 1-step undo.
