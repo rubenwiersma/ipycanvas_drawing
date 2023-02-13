@@ -125,8 +125,8 @@ class DrawingWidget(object):
                 self.canvas[2].stroke_rect(self.shape[0][0], self.shape[0][1], x - self.shape[0][0], y - self.shape[0][1])
             elif (tool == Tools.CIRCLE):
                 self.canvas[2].clear()
-                self.canvas[2].fill_circle(self.shape[0][0], self.shape[0][1], self.drawing_line_width)
-                self.canvas[2].stroke_circle(self.shape[0][0], self.shape[0][1], ((x - self.shape[0][0])**2 + (y - self.shape[0][1])**2)**0.5)
+                circle_radius = max(x - self.shape[0][0], y - self.shape[0][1]) / 2
+                self.canvas[2].stroke_circle(self.shape[0][0] + circle_radius, self.shape[0][1] + circle_radius, circle_radius)
 
             self.position = (x, y)
             
@@ -143,7 +143,8 @@ class DrawingWidget(object):
             elif (tool == Tools.SQUARE):
                 self.canvas[1].fill_rect(self.shape[0][0], self.shape[0][1], x - self.shape[0][0], y - self.shape[0][1])
             elif (tool == Tools.CIRCLE):
-                self.canvas[1].fill_circle(self.shape[0][0], self.shape[0][1], ((x - self.shape[0][0])**2 + (y - self.shape[0][1])**2)**0.5)
+                circle_radius = max(x - self.shape[0][0], y - self.shape[0][1]) / 2
+                self.canvas[1].fill_circle(self.shape[0][0] + circle_radius, self.shape[0][1] + circle_radius, circle_radius)
 
         self.shape = []
 
